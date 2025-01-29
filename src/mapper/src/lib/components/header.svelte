@@ -5,6 +5,7 @@
 	import { getLoginStore } from '$store/login.svelte.ts';
 	import { drawerItems as menuItems } from '$constants/drawerItems.ts';
 	import { revokeCookies } from '$lib/utils/login';
+	import OdkWebFormsWrapper from '$lib/components/forms/wrapper.svelte';
 	import { getAlertStore } from '$store/common.svelte';
 	import { getProjectSetupStepStore } from '$store/common.svelte.ts';
 	import { projectSetupStep as projectSetupStepEnum } from '$constants/enums.ts';
@@ -147,5 +148,10 @@
 				<span class="font-barlow font-medium text-base">SIGN OUT</span>
 			</sl-button>
 		{/if}
+	</div>
+</hot-drawer>
+<hot-drawer>
+	<div class="flex flex-col gap-8 px-4">
+		<OdkWebFormsWrapper />
 	</div>
 </hot-drawer>

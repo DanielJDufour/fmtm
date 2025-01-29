@@ -4,8 +4,9 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { sveltekit } from '@sveltejs/kit/vite';
 import UnoCSS from 'unocss/vite';
 import extractorSvelte from '@unocss/extractor-svelte';
+import envisage from 'envisage';
 
-export default defineConfig({
+const config = {
 	plugins: [
 		sveltekit(),
 		UnoCSS({
@@ -43,4 +44,13 @@ export default defineConfig({
 	optimizeDeps: {
 		exclude: ['@electric-sql/pglite'],
 	},
+};
+
+envisage.assign({
+	target: config,
+	prefix: 'VITE',
+	lowercase: true,
+	convert_boolean: true
 });
+
+export default defineConfig(config);

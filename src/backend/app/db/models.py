@@ -78,7 +78,7 @@ if TYPE_CHECKING:
         ProjectUpdate,
     )
     from app.tasks.task_schemas import TaskEventIn
-    from app.users.user_schemas import UserIn
+    from app.users.user_schemas import UserIn, UserUpdate
 
 
 def dump_and_check_model(db_model: BaseModel):
@@ -155,12 +155,13 @@ class DbUser(BaseModel):
     is_email_verified: Optional[bool] = False
     is_expert: Optional[bool] = False
     mapping_level: Optional[MappingLevel] = None
-    tasks_mapped: Optional[int] = None
+    tasks_mapped: Optional[int] = 0
     tasks_validated: Optional[int] = None
     tasks_invalidated: Optional[int] = None
     projects_mapped: Optional[list[int]] = None
     api_key: Optional[str] = None
     registered_at: Optional[AwareDatetime] = None
+    last_login_at: Optional[AwareDatetime] = None
 
     # Relationships
     project_roles: Optional[dict[int, ProjectRole]] = None  # project:role pairs
@@ -208,12 +209,12 @@ class DbUser(BaseModel):
                 sql,
                 {"user_identifier": user_identifier},
             )
-            db_project = await cur.fetchone()
+            db_user = await cur.fetchone()
 
-        if db_project is None:
+        if db_user is None:
             raise KeyError(f"User ({user_identifier}) not found.")
 
-        return db_project
+        return db_user
 
     @classmethod
     async def all(
@@ -312,6 +313,36 @@ class DbUser(BaseModel):
             )
 
         return new_user
+
+    @classmethod
+    async def update(
+        cls, db: Connection, user_id: int, user_update: "UserUpdate"
+    ) -> Self:
+        """Update the role of a specific user."""
+        model_dump = dump_and_check_model(user_update)
+        placeholders = [f"{key} = %({key})s" for key in model_dump.keys()]
+        sql = f"""
+            UPDATE users
+            SET {", ".join(placeholders)}
+            WHERE id = %(user_id)s
+            RETURNING *;
+        """
+
+        async with db.cursor(row_factory=class_row(cls)) as cur:
+            await cur.execute(
+                sql,
+                {"user_id": user_id, **model_dump},
+            )
+            updated_user = await cur.fetchone()
+
+        if updated_user is None:
+            msg = f"Failed to update user with ID: {user_id}"
+            log.error(msg)
+            raise HTTPException(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=msg
+            )
+
+        return updated_user
 
 
 class DbOrganisation(BaseModel):

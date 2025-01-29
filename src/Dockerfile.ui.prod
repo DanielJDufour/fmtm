@@ -5,12 +5,14 @@ ENV VITE_API_URL=${VITE_API_URL} \
     VITE_SYNC_URL=${VITE_SYNC_URL} \
     PNPM_HOME="/pnpm" \
     PATH="$PATH:/pnpm"
-RUN corepack enable && corepack use pnpm@9.15.4
+RUN npm install -g pnpm@9.15.4
 WORKDIR /app
 
 
 FROM base AS manager-frontend
 COPY frontend/package.json frontend/pnpm-lock.yaml ./
+# avoids .../node_modules/@prisma/client postinstall: warning In order to use "@prisma/client", please install Prisma CLI. You can install it with "npm add -D prisma".
+RUN pnpm install -D prisma
 RUN pnpm install
 COPY frontend/ .
 RUN pnpm run build
@@ -18,6 +20,8 @@ RUN pnpm run build
 
 FROM base AS mapper-frontend
 COPY mapper/package.json mapper/pnpm-lock.yaml ./
+# avoids .../node_modules/@prisma/client postinstall: warning In order to use "@prisma/client", please install Prisma CLI. You can install it with "npm add -D prisma".
+RUN pnpm install -D prisma
 RUN pnpm install
 COPY mapper/ .
 RUN pnpm run build

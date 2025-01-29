@@ -141,6 +141,9 @@
 					<sl-button variant="default" size="small" class="primary col-span-2 sm:col-span-1">
 						<span class="font-barlow font-medium text-sm">GO TO ODK</span>
 					</sl-button>
+					<sl-button variant="default" size="small" class="primary col-span-2 sm:col-span-1">
+						<span class="font-barlow font-medium text-sm">GO TO WEB FORMS</span>
+					</sl-button>					
 				</div>
 			{/if}
 		</div>
