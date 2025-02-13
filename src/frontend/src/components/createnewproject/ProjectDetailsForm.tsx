@@ -14,7 +14,8 @@ import RichTextEditor from '@/components/common/Editor/Editor';
 import useDocumentTitle from '@/utilfunctions/useDocumentTitle';
 import DescriptionSection from '@/components/createnewproject/Description';
 import Select2 from '@/components/common/Select2';
-import { GetUserListService } from '@/api/User';
+import { GetUserListForSelect } from '@/api/User';
+import { UserActions } from '@/store/slices/UserSlice';
 
 const VITE_API_URL = import.meta.env.VITE_API_URL;
 
@@ -26,7 +27,7 @@ const ProjectDetailsForm = ({ flag }) => {
   const projectDetails = useAppSelector((state) => state.createproject.projectDetails);
   const organisationListData = useAppSelector((state) => state.createproject.organisationList);
   const organisationListLoading = useAppSelector((state) => state.createproject.organisationListLoading);
-  const userList = useAppSelector((state) => state.user.userList)?.map((user) => ({
+  const userList = useAppSelector((state) => state.user.userListForSelect)?.map((user) => ({
     id: user.id,
     label: user.username,
     value: user.id,
@@ -42,6 +43,7 @@ const ProjectDetailsForm = ({ flag }) => {
   const [hasODKCredentials, setHasODKCredentials] = useState(false);
 
   const submission = () => {
+    console.log("callin submission:", submission);
     dispatch(CreateProjectActions.SetIndividualProjectDetailsData(values));
     dispatch(CommonActions.SetCurrentStepFormStep({ flag: flag, step: 2 }));
     navigate('/project-area');
@@ -66,16 +68,16 @@ const ProjectDetailsForm = ({ flag }) => {
     };
   }, []);
 
-  useEffect(() => {
-    dispatch(GetUserListService(`${VITE_API_URL}/users`));
-  }, []);
-
   const handleInputChanges = (e) => {
     handleChange(e);
     dispatch(CreateProjectActions.SetIsUnsavedChanges(true));
   };
 
-  const setSelectedOrganisation = (orgId) => {
+  const getSelectedOrganization = () => {
+    return organisationList.find((org) => org.value === values.organisation_id);
+  };
+
+  const handleOrganizationChange = (orgId: number) => {
     // Ensure orgId is not null or undefined before integer convert
     const orgIdInt = orgId && +orgId;
 
@@ -83,32 +85,25 @@ const ProjectDetailsForm = ({ flag }) => {
       return;
     }
 
-    handleCustomChange('organisation_id', orgIdInt);
-
     const selectedOrg = organisationList.find((org) => org.value === orgIdInt);
-
-    if (selectedOrg && selectedOrg.hasODKCredentials) {
-      handleCustomChange('defaultODKCredentials', selectedOrg.hasODKCredentials);
-    } else {
-      // Allow the user to choose default credentials for orgs without ODK credentials
-      handleCustomChange('defaultODKCredentials', false);
-    }
+    handleCustomChange('organisation_id', orgIdInt);
+    handleCustomChange('useDefaultODKCredentials', selectedOrg?.hasODKCredentials || false);
   };
 
   useEffect(() => {
     if (!values.organisation_id) {
-      handleCustomChange('defaultODKCredentials', false);
+      handleCustomChange('useDefaultODKCredentials', false);
     }
   }, []);
 
   useEffect(() => {
-    if (values.defaultODKCredentials) {
+    if (values.useDefaultODKCredentials) {
       // Reset user provided credentials
       handleCustomChange('odk_central_url', '');
       handleCustomChange('odk_central_user', '');
       handleCustomChange('odk_central_password', '');
     }
-  }, [values.defaultODKCredentials]);
+  }, [values.useDefaultODKCredentials]);
 
   useEffect(() => {
     organisationList?.map((organization) => {
@@ -118,6 +113,12 @@ const ProjectDetailsForm = ({ flag }) => {
     });
   }, [organisationList]);
 
+  const shouldShowCustomODKFields = () => {
+    return !values.useDefaultODKCredentials;
+  };
+
+  console.warn("projectDetails:", projectDetails);
+
   return (
     <div className="fmtm-flex fmtm-gap-7 fmtm-flex-col lg:fmtm-flex-row fmtm-h-full">
       <DescriptionSection section="Project Details" />
@@ -126,6 +127,7 @@ const ProjectDetailsForm = ({ flag }) => {
         onSubmit={handleSubmit}
       >
         <div className="fmtm-flex fmtm-flex-col fmtm-gap-6 xl:fmtm-w-[50%]">
+          {/* Project name & descriptions */}
           <InputTextField
             id="name"
             name="name"
@@ -156,6 +158,7 @@ const ProjectDetailsForm = ({ flag }) => {
             required
             errorMsg={errors.description}
           />
+          {/* Select organisation */}
           <div>
             <p className={`fmtm-text-[1rem] fmtm-mb-2 fmtm-font-semibold !fmtm-bg-transparent`}>
               Organization Name <span className="fmtm-text-red-500 fmtm-text-[1rem]">*</span>
@@ -164,7 +167,7 @@ const ProjectDetailsForm = ({ flag }) => {
               options={organisationList || []}
               value={values.organisation_id}
               onChange={(value: any) => {
-                setSelectedOrganisation(value);
+                handleOrganizationChange(value);
               }}
               placeholder="Organization Name"
               className="naxatw-w-1/5 naxatw-min-w-[9rem]"
@@ -174,21 +177,7 @@ const ProjectDetailsForm = ({ flag }) => {
               <p className="fmtm-form-error fmtm-text-red-600 fmtm-text-sm fmtm-py-1">{errors.organisation_id}</p>
             )}
           </div>
-          <div>
-            <p className="fmtm-text-[1rem] fmtm-mb-2 fmtm-font-semibold !fmtm-bg-transparent">Assign Project Admin</p>
-            <Select2
-              options={userList || []}
-              value={values.project_admins}
-              onChange={(value: any) => {
-                handleCustomChange('project_admins', value);
-              }}
-              placeholder="Assign Project Admin"
-              className="naxatw-w-1/5 naxatw-min-w-[9rem]"
-              multiple
-              checkBox
-              isLoading={userListLoading}
-            />
-          </div>
+          {/* Custom ODK creds toggle */}
           <div
             className="fmtm-flex fmtm-flex-col fmtm-gap-6"
             onMouseOver={() => {
@@ -198,51 +187,48 @@ const ProjectDetailsForm = ({ flag }) => {
           >
             {
               <CustomCheckbox
-                key="defaultODKCredentials"
+                key="useDefaultODKCredentials"
                 label="Use default ODK credentials"
-                checked={values.defaultODKCredentials}
+                checked={values.useDefaultODKCredentials}
+                // disabled={projectDetails?.defaultODKCredentials === undefined}
                 onCheckedChange={() => {
-                  handleCustomChange('defaultODKCredentials', !values.defaultODKCredentials);
+                  handleCustomChange('useDefaultODKCredentials', !values.useDefaultODKCredentials);
                 }}
                 className="fmtm-text-black"
                 labelClickable={hasODKCredentials} // Dynamically set labelClickable based on hasODKCredentials
               />
             }
-            {!values.defaultODKCredentials && !hasODKCredentials && (
-              <>
-                <InputTextField
-                  id="odk_central_url"
-                  name="odk_central_url"
-                  label="ODK Central URL"
-                  value={values?.odk_central_url}
-                  onChange={handleChange}
-                  fieldType="text"
-                  errorMsg={errors.odk_central_url}
-                  required
-                />
-                <InputTextField
-                  id="odk_central_user"
-                  name="odk_central_user"
-                  label="ODK Central Email"
-                  value={values?.odk_central_user}
-                  onChange={handleChange}
-                  fieldType="text"
-                  errorMsg={errors.odk_central_user}
-                  required
-                />
-                <InputTextField
-                  id="odk_central_password"
-                  name="odk_central_password"
-                  label="ODK Central Password"
-                  value={values?.odk_central_password}
-                  onChange={handleChange}
-                  fieldType="password"
-                  errorMsg={errors.odk_central_password}
-                  required
-                />
-              </>
+            {shouldShowCustomODKFields() && (
+              <ODKCredentialsFields values={values} errors={errors} handleChange={handleChange} />
             )}
           </div>
+          {/* Select project admin */}
+          <div>
+            <p className="fmtm-text-[1rem] fmtm-mb-2 fmtm-font-semibold !fmtm-bg-transparent">Assign Project Admin</p>
+            <Select2
+              name="project_admins"
+              options={userList || []}
+              value={values.project_admins}
+              onChange={(value: any) => {
+                handleCustomChange('project_admins', value);
+              }}
+              placeholder="Search for FMTM users"
+              className="naxatw-w-1/5 naxatw-min-w-[9rem]"
+              multiple
+              checkBox
+              isLoading={userListLoading}
+              handleApiSearch={(value) => {
+                if (value) {
+                  dispatch(
+                    GetUserListForSelect(`${VITE_API_URL}/users`, { search: value, page: 1, results_per_page: 30 }),
+                  );
+                } else {
+                  dispatch(UserActions.SetUserListForSelect([]));
+                }
+              }}
+            />
+          </div>
+          {/* Hashtags */}
           <div>
             <InputTextField
               id="hashtags"
@@ -259,6 +245,7 @@ const ProjectDetailsForm = ({ flag }) => {
               analysis later, but should be human informative and not overused, #group #event
             </p>
           </div>
+          {/* Custom TMS */}
           <div className="fmtm-flex fmtm-flex-col fmtm-gap-5">
             <div
               onMouseOver={() => {
@@ -288,6 +275,7 @@ const ProjectDetailsForm = ({ flag }) => {
               />
             )}
           </div>
+          {/* Task instructions */}
           <div>
             <p className="fmtm-text-[1rem] fmtm-font-semibold fmtm-mb-2">Instructions</p>
             <RichTextEditor
@@ -304,5 +292,40 @@ const ProjectDetailsForm = ({ flag }) => {
     </div>
   );
 };
+
+const ODKCredentialsFields = ({ values, errors, handleChange }) => (
+  <>
+    <InputTextField
+      id="odk_central_url"
+      name="odk_central_url"
+      label="ODK Central URL"
+      value={values?.odk_central_url}
+      onChange={handleChange}
+      fieldType="text"
+      errorMsg={errors.odk_central_url}
+      required
+    />
+    <InputTextField
+      id="odk_central_user"
+      name="odk_central_user"
+      label="ODK Central Email"
+      value={values?.odk_central_user}
+      onChange={handleChange}
+      fieldType="text"
+      errorMsg={errors.odk_central_user}
+      required
+    />
+    <InputTextField
+      id="odk_central_password"
+      name="odk_central_password"
+      label="ODK Central Password"
+      value={values?.odk_central_password}
+      onChange={handleChange}
+      fieldType="password"
+      errorMsg={errors.odk_central_password}
+      required
+    />
+  </>
+);
 
 export default ProjectDetailsForm;

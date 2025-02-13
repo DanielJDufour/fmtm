@@ -161,6 +161,8 @@ class EntityState(IntEnum, Enum):
     READY = 0
     OPENED_IN_ODK = 1
     SURVEY_SUBMITTED = 2
+    NEW_GEOM = 3
+    VALIDATED = 5
     MARKED_BAD = 6
 
 
@@ -266,3 +268,11 @@ class GeomStatus(StrEnum, Enum):
 
     NEW = "NEW"
     BAD = "BAD"
+
+
+class OdkWebhookEvents(StrEnum, Enum):
+    """Types of events received from ODK Central webhook."""
+
+    UPDATE_ENTITY = "entity.update.version"
+    NEW_SUBMISSION = "submission.create"
+    REVIEW_SUBMISSION = "submission.update"

@@ -64,6 +64,7 @@ from app.s3 import add_obj_to_bucket, delete_all_objs_under_prefix
 
 # Avoid cyclical dependencies when only type checking
 if TYPE_CHECKING:
+    from app.central.central_schemas import OdkEntitiesUpdate
     from app.organisations.organisation_schemas import (
         OrganisationIn,
         OrganisationUpdate,
@@ -155,7 +156,7 @@ class DbUser(BaseModel):
     is_email_verified: Optional[bool] = False
     is_expert: Optional[bool] = False
     mapping_level: Optional[MappingLevel] = None
-    tasks_mapped: Optional[int] = None
+    tasks_mapped: Optional[int] = 0
     tasks_validated: Optional[int] = None
     tasks_invalidated: Optional[int] = None
     projects_mapped: Optional[list[int]] = None
@@ -218,18 +219,37 @@ class DbUser(BaseModel):
 
     @classmethod
     async def all(
-        cls, db: Connection, skip: int = 0, limit: int = 100
+        cls,
+        db: Connection,
+        skip: Optional[int] = None,
+        limit: Optional[int] = None,
+        search: Optional[str] = None,
     ) -> Optional[list[Self]]:
         """Fetch all users."""
+        filters = []
+        params = {"offset": skip, "limit": limit} if skip and limit else {}
+
+        if search:
+            filters.append("username ILIKE %(search)s")
+            params["search"] = f"%{search}%"
+
+        sql = f"""
+            SELECT * FROM users
+            {"WHERE " + " AND ".join(filters) if filters else ""}
+            ORDER BY registered_at DESC
+        """
+        sql += (
+            """
+            OFFSET %(offset)s
+            LIMIT %(limit)s;
+        """
+            if skip and limit
+            else ";"
+        )
         async with db.cursor(row_factory=class_row(cls)) as cur:
             await cur.execute(
-                """
-                SELECT * FROM users
-                ORDER BY registered_at DESC
-                OFFSET %(offset)s
-                LIMIT %(limit)s;
-                """,
-                {"offset": skip, "limit": limit},
+                sql,
+                params,
             )
             return await cur.fetchall()
 
@@ -289,7 +309,8 @@ class DbUser(BaseModel):
             SET
                 role = EXCLUDED.role,
                 mapping_level = EXCLUDED.mapping_level,
-                name = EXCLUDED.name
+                name = EXCLUDED.name,
+                api_key = EXCLUDED.api_key
         """
 
         sql = f"""
@@ -1515,6 +1536,34 @@ class DbOdkEntities(BaseModel):
                 result.extend(batch_result)
 
         return bool(result)
+
+    @classmethod
+    async def update(
+        cls, db: Connection, entity_uuid: str, entity_update: "OdkEntitiesUpdate"
+    ) -> bool:
+        """Update the entity value in the FMTM db."""
+        model_dump = dump_and_check_model(entity_update)
+        placeholders = [f"{key} = %({key})s" for key in model_dump.keys()]
+        sql = f"""
+            UPDATE odk_entities
+            SET {", ".join(placeholders)}
+            WHERE entity_id = %(entity_uuid)s
+            RETURNING entity_id;
+        """
+
+        async with db.cursor() as cur:
+            await cur.execute(
+                sql,
+                {"entity_uuid": entity_uuid, **model_dump},
+            )
+            success = await cur.fetchone()
+
+        if not success:
+            msg = f"Failed to update entity with UUID: {entity_uuid}"
+            log.error(msg)
+            return False
+
+        return True
 
 
 class DbBackgroundTask(BaseModel):
