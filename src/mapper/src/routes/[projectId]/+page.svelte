@@ -17,6 +17,7 @@
 	import BasemapComponent from '$lib/components/offline/basemaps.svelte';
 	import DialogTaskActions from '$lib/components/dialog-task-actions.svelte';
 	import DialogEntityActions from '$lib/components/dialog-entities-actions.svelte';
+	import OdkWebFormsWrapper from '$lib/components/forms/wrapper.svelte';
 	import type { ProjectTask } from '$lib/types';
 	import { openOdkCollectNewFeature } from '$lib/odk/collect';
 	import { convertDateToTimeAgo } from '$lib/utils/datetime';
@@ -26,6 +27,7 @@
 	import { getProjectSetupStepStore, getCommonStore } from '$store/common.svelte.ts';
 	import { projectSetupStep as projectSetupStepEnum } from '$constants/enums.ts';
 	import type { ShapeStream } from '@electric-sql/client';
+	import type { SlDrawer } from '@shoelace-style/shoelace';
 
 	const API_URL = import.meta.env.VITE_API_URL;
 
@@ -34,6 +36,8 @@
 	}
 
 	let { data }: Props = $props();
+
+	let odkWebFormsWrapperRef: SlDrawer | undefined = $state();
 
 	let maplibreMap: maplibregl.Map | undefined = $state(undefined);
 	let tabGroup: SlTabGroup;
@@ -175,7 +179,7 @@
 {/if}
 
 <!-- The main page -->
-<div class="h-[calc(100svh-3.699rem)] sm:h-[calc(100svh-4.625rem)] font-barlow">
+<div class="h-[calc(100svh-3.699rem)] sm:h-[calc(100svh-4.625rem)] font-barlow" style="position: relative">
 	<MapComponent
 		setMapRef={(map) => {
 			maplibreMap = map;
@@ -245,6 +249,7 @@
 			openedActionModal = null;
 			isDrawEnabled = true;
 		}}
+		webFormsDrawerRef={odkWebFormsWrapperRef}
 	/>
 	<DialogEntityActions
 		isTaskActionModalOpen={openedActionModal === 'entity-modal'}
@@ -253,6 +258,7 @@
 		}}
 		selectedTab={commonStore.selectedTab}
 		projectData={data?.project}
+		webFormsDrawerRef={odkWebFormsWrapperRef}
 	/>
 	{#if commonStore.selectedTab !== 'map'}
 		<BottomSheet onClose={() => tabGroup.show('map')}>
@@ -338,6 +344,9 @@
 			<hot-icon name="three-dots" class="!text-[1.7rem] !sm:text-[2rem]"></hot-icon>
 		</sl-tab>
 	</sl-tab-group>
+
+<OdkWebFormsWrapper bind:drawerRef={odkWebFormsWrapperRef} />
+
 </div>
 
 <style>
