@@ -45,7 +45,7 @@
 	let isDrawEnabled: boolean = $state(false);
 	let latestEventTime: string = $state('');
 	let isGeometryCreationLoading: boolean = $state(false);
-	
+
 	const taskStore = getTaskStore();
 	const entitiesStore = getEntitiesStatusStore();
 	const commonStore = getCommonStore();
@@ -92,7 +92,7 @@
 		return () => clearInterval(interval); // Cleanup interval on unmount
 	});
 
-	function zoomToTask(taskId: number, fitOptions?: Record<string, any> =  {duration: 0}) {
+	function zoomToTask(taskId: number, fitOptions?: Record<string, any> = { duration: 0 }) {
 		const taskObj = data.project.tasks.find((task: ProjectTask) => task.id === taskId);
 
 		if (!taskObj) return;
@@ -245,10 +245,10 @@
 				</sl-button>
 				<sl-button
 					onclick={() => {
-						zoomToTask(commentMention.task_id, { duration: 0, padding:	{bottom: 325} });
+						zoomToTask(commentMention.task_id, { duration: 0, padding: { bottom: 325 } });
 						const osmId = commentMention?.comment?.split(' ')?.[1]?.replace('#featureId:', '');
 						entitiesStore.setSelectedEntity(osmId);
-						openedActionModal = 'entity-modal'
+						openedActionModal = 'entity-modal';
 						taskStore.dismissCommentMention();
 					}}
 					onkeydown={(e: KeyboardEvent) => {
@@ -434,11 +434,11 @@
 			<sl-tab slot="nav" panel="offline">
 				<hot-icon name="wifi-off" class="!text-[1.7rem] !sm:text-[2rem]"></hot-icon>
 			</sl-tab>
-			{#if (!enableWebforms)}
+			{#if !enableWebforms}
 				<sl-tab slot="nav" panel="qrcode">
 					<hot-icon name="qr-code" class="!text-[1.7rem] !sm:text-[2rem]"></hot-icon>
 				</sl-tab>
-			 {/if}
+			{/if}
 			<sl-tab slot="nav" panel="events">
 				<hot-icon name="three-dots" class="!text-[1.7rem] !sm:text-[2rem]"></hot-icon>
 			</sl-tab>

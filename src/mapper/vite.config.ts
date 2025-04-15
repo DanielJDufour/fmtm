@@ -58,6 +58,9 @@ export default defineConfig({
 		}),
 	],
 	server: {
+		headers: {
+			'Permissions-Policy': 'geolocation=(self)',
+		},
 		host: true,
 		port: 7057,
 	},

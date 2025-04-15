@@ -116,8 +116,7 @@
 			// Geolocation not enabled, warn user
 			if (!coordFrom) {
 				alertStore.setAlert({
-					message:
-						m['dialog_entities_actions.distance_constraint'](),
+					message: m['dialog_entities_actions.distance_constraint'](),
 					variant: 'warning',
 				});
 				return;
@@ -337,7 +336,8 @@
 	>
 		<div class="flex items-start flex-col">
 			<p class="text-base mb-5 text-gray-700">
-				{m['dialog_entities_actions.you_are']()} <b
+				{m['dialog_entities_actions.you_are']()}
+				<b
 					>{(
 						distance(
 							entitiesStore.selectedEntityCoordinate?.coordinate as Coord,
@@ -345,7 +345,8 @@
 							{ units: 'kilometers' },
 						) * 1000
 					).toFixed(2)}m</b
-				> {m['dialog_entities_actions.away_sure']()}
+				>
+				{m['dialog_entities_actions.away_sure']()}
 			</p>
 			<div class="flex gap-2 ml-auto">
 				<sl-button

@@ -542,90 +542,90 @@
 	</GeoJSON>
 	<!-- The features / entities -->
 	{#if entitiesUrl}
-	<FlatGeobuf
-		id="entities"
-		url={entitiesUrl}
-		extent={taskStore.selectedTaskGeom}
-		extractGeomCols={true}
-		promoteId="id"
-		processGeojson={(geojsonData) => addStatusToGeojsonProperty(geojsonData, '')}
-		geojsonUpdateDependency={[entityMapByEntity, entityMapByOsm]}
-	>
-		{#if primaryGeomType === MapGeomTypes.POLYGON}
-			<FillLayer
-				id="entity-polygon-layer"
-				paint={{
-					'fill-opacity': ['match', ['get', 'status'], 'MARKED_BAD', 0, 0.6],
-					'fill-color': [
-						'match',
-						['get', 'status'],
-						'READY',
-						'#9c9a9a',
-						'OPENED_IN_ODK',
-						'#fae15f',
-						'SURVEY_SUBMITTED',
-						'#71bf86',
-						'VALIDATED',
-						'#71bf86',
-						'MARKED_BAD',
-						'#fa1100',
-						'#c5fbf5', // default color if no match is found
-					],
-					'fill-outline-color': [
-						'match',
-						['get', 'status'],
-						'READY',
-						'#000000',
-						'OPENED_IN_ODK',
-						'#ffd603',
-						'SURVEY_SUBMITTED',
-						'#32a852',
-						'MARKED_BAD',
-						'#fa1100',
-						'#c5fbf5',
-					],
-				}}
-				beforeLayerType="symbol"
-				manageHoverState
-			/>
-			<LineLayer
-				layout={{ 'line-cap': 'round', 'line-join': 'round' }}
-				paint={{
-					'line-color': '#fa1100',
-					'line-width': ['case', ['==', ['get', 'entity_id'], entitiesStore.selectedEntity || ''], 1, 0],
-					'line-opacity': ['case', ['==', ['get', 'entity_id'], entitiesStore.selectedEntity || ''], 1, 0.35],
-				}}
-				beforeLayerType="symbol"
-				manageHoverState
-			/>
-		{:else if primaryGeomType === MapGeomTypes.POINT}
-			<SymbolLayer
-				id="entity-point-layer"
-				applyToClusters={false}
-				hoverCursor="pointer"
-				manageHoverState
-				layout={{
-					'icon-image': [
-						'match',
-						['get', 'status'],
-						'READY',
-						'MAP_PIN_GREY',
-						'OPENED_IN_ODK',
-						'MAP_PIN_YELLOW',
-						'SURVEY_SUBMITTED',
-						'MAP_PIN_GREEN',
-						'VALIDATED',
-						'MAP_PIN_BLUE',
-						'MARKED_BAD',
-						'MAP_PIN_RED',
-						'#c5fbf5', // default color if no match is found
-					],
-					'icon-allow-overlap': true,
-					'icon-size': ['case', ['==', ['get', 'entity_id'], entitiesStore.selectedEntity || ''], 1.6, 1],
-				}}
-			/>
-		{/if}
-	</FlatGeobuf>
+		<FlatGeobuf
+			id="entities"
+			url={entitiesUrl}
+			extent={taskStore.selectedTaskGeom}
+			extractGeomCols={true}
+			promoteId="id"
+			processGeojson={(geojsonData) => addStatusToGeojsonProperty(geojsonData, '')}
+			geojsonUpdateDependency={[entityMapByEntity, entityMapByOsm]}
+		>
+			{#if primaryGeomType === MapGeomTypes.POLYGON}
+				<FillLayer
+					id="entity-polygon-layer"
+					paint={{
+						'fill-opacity': ['match', ['get', 'status'], 'MARKED_BAD', 0, 0.6],
+						'fill-color': [
+							'match',
+							['get', 'status'],
+							'READY',
+							'#9c9a9a',
+							'OPENED_IN_ODK',
+							'#fae15f',
+							'SURVEY_SUBMITTED',
+							'#71bf86',
+							'VALIDATED',
+							'#71bf86',
+							'MARKED_BAD',
+							'#fa1100',
+							'#c5fbf5', // default color if no match is found
+						],
+						'fill-outline-color': [
+							'match',
+							['get', 'status'],
+							'READY',
+							'#000000',
+							'OPENED_IN_ODK',
+							'#ffd603',
+							'SURVEY_SUBMITTED',
+							'#32a852',
+							'MARKED_BAD',
+							'#fa1100',
+							'#c5fbf5',
+						],
+					}}
+					beforeLayerType="symbol"
+					manageHoverState
+				/>
+				<LineLayer
+					layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+					paint={{
+						'line-color': '#fa1100',
+						'line-width': ['case', ['==', ['get', 'entity_id'], entitiesStore.selectedEntity || ''], 1, 0],
+						'line-opacity': ['case', ['==', ['get', 'entity_id'], entitiesStore.selectedEntity || ''], 1, 0.35],
+					}}
+					beforeLayerType="symbol"
+					manageHoverState
+				/>
+			{:else if primaryGeomType === MapGeomTypes.POINT}
+				<SymbolLayer
+					id="entity-point-layer"
+					applyToClusters={false}
+					hoverCursor="pointer"
+					manageHoverState
+					layout={{
+						'icon-image': [
+							'match',
+							['get', 'status'],
+							'READY',
+							'MAP_PIN_GREY',
+							'OPENED_IN_ODK',
+							'MAP_PIN_YELLOW',
+							'SURVEY_SUBMITTED',
+							'MAP_PIN_GREEN',
+							'VALIDATED',
+							'MAP_PIN_BLUE',
+							'MARKED_BAD',
+							'MAP_PIN_RED',
+							'#c5fbf5', // default color if no match is found
+						],
+						'icon-allow-overlap': true,
+						'icon-size': ['case', ['==', ['get', 'entity_id'], entitiesStore.selectedEntity || ''], 1.6, 1],
+					}}
+				/>
+			{/if}
+		</FlatGeobuf>
 	{/if}
 	<GeoJSON id="bad-geoms" data={entitiesStore.badGeomList}>
 		{#if drawGeomType === MapGeomTypes.POLYGON}

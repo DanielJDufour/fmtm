@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '$styles/page.css';
-	import { m } from "$translations/messages.js";
+	import { m } from '$translations/messages.js';
 
 	type taskStatusesType = { status: string; color: string };
 	type Props = {

@@ -5,7 +5,7 @@
 	import { getLoginStore } from '$store/login.svelte.ts';
 	import { getCommonStore } from '$store/common.svelte.ts';
 	import { generateQrCode, downloadQrCode } from '$lib/odk/qrcode';
-	import { m } from "$translations/messages.js";
+	import { m } from '$translations/messages.js';
 
 	interface Props {
 		infoDialogRef: SlDialog | null;
@@ -50,7 +50,8 @@
 
 	<!-- QR Code Container -->
 	<div class="flex justify-center w-full max-w-sm">
-		<hot-qr-code value={qrCodeData} label={m['qrcode.scan_to_open_odk']()} size="250" class="p-4 bg-white m-4"></hot-qr-code>
+		<hot-qr-code value={qrCodeData} label={m['qrcode.scan_to_open_odk']()} size="250" class="p-4 bg-white m-4"
+		></hot-qr-code>
 	</div>
 
 	<!-- Download Button -->

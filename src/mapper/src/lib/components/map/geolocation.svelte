@@ -3,7 +3,7 @@
 	import type { FeatureCollection } from 'geojson';
 	import MapLibreGlDirections, { LoadingIndicatorControl } from '@maplibre/maplibre-gl-directions';
 
-	import { m } from "$translations/messages.js";
+	import { m } from '$translations/messages.js';
 	import { GetDeviceRotation } from '$lib/utils/getDeviceRotation';
 	import { getAlertStore } from '$store/common.svelte.ts';
 	import { getEntitiesStatusStore } from '$store/entities.svelte.ts';
@@ -240,7 +240,8 @@
 				<span>{m['map.enable_geolocation']()}</span>
 				<button
 					class="text-white rounded"
-					style="border: white 1px solid; width: fit-content; padding-left: 10px; padding-right: 10px">{m['map.enable_geolocation_got_it']()}</button
+					style="border: white 1px solid; width: fit-content; padding-left: 10px; padding-right: 10px"
+					>{m['map.enable_geolocation_got_it']()}</button
 				>
 			</div>
 			<ControlButton

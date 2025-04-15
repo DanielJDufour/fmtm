@@ -3,7 +3,7 @@
 	import { commentTask } from '$lib/db/events';
 	import type { TaskEventType } from '$lib/types';
 	import { getTaskStore } from '$store/tasks.svelte.ts';
-	import { m } from "$translations/messages.js";
+	import { m } from '$translations/messages.js';
 
 	interface Props {
 		comments: TaskEventType[];
@@ -25,7 +25,9 @@
 		{#if comments?.length === 0}
 			<div class="flex justify-center mt-10">
 				<p class="text-[#484848] text-base">
-					{taskStore?.selectedTaskIndex ? `${m['comment.no_comments_yet_on_task']()} ${taskStore?.selectedTaskIndex}` : m['comment.no_comments_yet']()}
+					{taskStore?.selectedTaskIndex
+						? `${m['comment.no_comments_yet_on_task']()} ${taskStore?.selectedTaskIndex}`
+						: m['comment.no_comments_yet']()}
 				</p>
 			</div>
 		{:else}
@@ -82,7 +84,8 @@
 					tabindex="0"
 					variant="default"
 					size="small"
-					class="secondary col-span-2 sm:col-span-1"><span class="font-barlow text-sm">{m['comment.clear']()}</span></sl-button
+					class="secondary col-span-2 sm:col-span-1"
+					><span class="font-barlow text-sm">{m['comment.clear']()}</span></sl-button
 				>
 				<sl-button
 					variant="primary"

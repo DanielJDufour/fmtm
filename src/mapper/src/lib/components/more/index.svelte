@@ -5,11 +5,11 @@
 	import ProjectInfo from '$lib/components/more/project-info.svelte';
 	import { getTaskStore } from '$store/tasks.svelte.ts';
 	import type { ProjectData, TaskEventType } from '$lib/types';
-	import { m } from "$translations/messages.js";
+	import { m } from '$translations/messages.js';
 
 	type stackType = '' | 'comment' | 'instructions' | 'activities' | 'project-info';
 
-	const stackGroup: { id: stackType, icon: string; title: string }[] = [
+	const stackGroup: { id: stackType; icon: string; title: string }[] = [
 		{
 			id: 'project-info',
 			icon: 'info-circle',
@@ -107,13 +107,13 @@
 				name="chevron-left"
 				class="text-[1rem] hover:-translate-x-[2px] duration-200 cursor-pointer text-[1.125rem] text-black hover:text-red-600 duration-200"
 				onclick={() => {
-					activeStack = ''; 
-					activeStackTitle = ''
+					activeStack = '';
+					activeStackTitle = '';
 				}}
 				onkeydown={(e: KeyboardEvent) => {
 					if (e.key === 'Enter') {
-						activeStack = ''; 
-						activeStackTitle = ''
+						activeStack = '';
+						activeStackTitle = '';
 					}
 				}}
 				tabindex="0"

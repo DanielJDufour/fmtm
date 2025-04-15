@@ -1,6 +1,5 @@
-
 <script lang="ts">
-	import { m } from "$translations/messages.js";
+	import { m } from '$translations/messages.js';
 
 	type descriptionType = {
 		key: string;

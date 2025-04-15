@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from "$translations/messages.js";
+	import { m } from '$translations/messages.js';
 	import { mapTask, finishTask, resetTask } from '$lib/db/events';
 	import type { ProjectData } from '$lib/types';
 	import { getTaskStore } from '$store/tasks.svelte.ts';
@@ -57,7 +57,7 @@
 			</div>
 
 			{#if taskStore.selectedTaskState === 'UNLOCKED_TO_MAP'}
-				<p class="my-4 sm:my-6">{m['popup.start_mapping_task']({taskId: taskStore.selectedTaskIndex})}</p>
+				<p class="my-4 sm:my-6">{m['popup.start_mapping_task']({ taskId: taskStore.selectedTaskIndex })}</p>
 				<div class="flex justify-center gap-x-2">
 					<sl-button
 						size="small"
@@ -95,7 +95,10 @@
 					</sl-button>
 				</div>
 			{:else if taskStore.selectedTaskState === 'LOCKED_FOR_MAPPING'}
-				<p class="my-4 sm:my-6">{m['dialog_task_actions.task']} #{taskStore.selectedTaskIndex} {m['dialog_task_actions.locked_is_complete']} </p>
+				<p class="my-4 sm:my-6">
+					{m['dialog_task_actions.task']} #{taskStore.selectedTaskIndex}
+					{m['dialog_task_actions.locked_is_complete']}
+				</p>
 				<div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
 					<sl-button
 						onclick={() => {
@@ -136,7 +139,9 @@
 						tabindex="0"
 					>
 						<hot-icon slot="prefix" name="check" class="!text-[1rem] text-white cursor-pointer duration-200"></hot-icon>
-						<span class="font-barlow font-medium text-sm">{m['dialog_entities_actions.complete_mapping']()}</span>
+						<span class="font-barlow font-medium text-sm"
+							>{m['dialog_entities_actions.complete_mapping']?.() || ''}</span
+						>
 					</sl-button>
 				</div>
 			{/if}

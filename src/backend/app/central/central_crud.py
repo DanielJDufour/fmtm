@@ -998,6 +998,14 @@ async def get_form_media(
     project_odk_id: int,
     odk_credentials: central_schemas.ODKCentralDecrypted,
 ):
+    return {
+        "culture.png": "http://mapper.fmtm.localhost:7050/assets/img/forms/culture.png",
+        "environment.png": "http://mapper.fmtm.localhost:7050/assets/img/forms/environment.png",
+        "housing.jpg": "http://mapper.fmtm.localhost:7050/assets/img/forms/housing.jpg",
+        "urban.png": "http://mapper.fmtm.localhost:7050/assets/img/forms/urban.png",
+        "work.jpg": "http://mapper.fmtm.localhost:7050/assets/img/forms/pwa-512x512.png"   
+    }
+
     """Get a list of form media attachments with their URLs."""
     async with central_deps.get_async_odk_form(odk_credentials) as async_odk_form:
         form_attachment_urls = await async_odk_form.getFormAttachmentUrls(

@@ -51,10 +51,13 @@
 					const text = texts[ii];
 					const text_id = text.getAttribute('id');
 					const value = text.querySelector('value:not([form=image])')?.textContent;
+					// sometimes value is "-" acting as a placeholder
 					if (value) {
+						// console.log("text:", text);
 						const image = text.querySelector('value[form=image]');
 						if (image) {
 							const filename = image.textContent.trim().replace('jr://images/', '');
+							console.log({ text, value, image, filename });
 							if (filename in formMedia) {
 								const imageUrl = formMedia[filename];
 								style.innerHTML += `.columns-pack label.value-option.no-buttons[for$=${value}] { background-image: url("${imageUrl}"); }\n`;

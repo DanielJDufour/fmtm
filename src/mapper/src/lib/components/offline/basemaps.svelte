@@ -12,7 +12,7 @@
 	import type { Basemap } from '$lib/utils/basemaps';
 	import { getProjectBasemapStore } from '$store/common.svelte.ts';
 	import { loadOnlinePmtiles, writeOfflinePmtiles } from '$lib/utils/basemaps';
-	import { m } from "$translations/messages.js";
+	import { m } from '$translations/messages.js';
 
 	interface Props {
 		projectId: number;
